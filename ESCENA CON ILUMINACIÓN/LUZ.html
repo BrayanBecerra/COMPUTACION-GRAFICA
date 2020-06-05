@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<title>LUCES</title>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+		<link type="text/css" rel="stylesheet" href="main.css">
+		
+		<style>
+		</style>
+	</head>
+	<body>
+
+		<div id="my-div">
+
+			
+		</div>
+
+		<script src="js/three.js"></script>
+		<script src="js/controls/OrbitControls.js"></script>
+		<script src="js/csg.js"></script>
+		<script src="js/THREE.CSG.js"></script>
+    	<script>
+
+            var camera, scene, rederer, controls, color;
+			var startTime = Date.now();
+			var gridHelper, modelo;
+
+			var light1, light2, light3, light4, light5, light6;
+
+			init();
+			animate();
+
+			function init() {
+
+				camera = new THREE.PerspectiveCamera( 45, window.innerWidth / window.innerHeight, 1, 10000 );
+				camera.position.set( 50, 15, 0 );
+
+				scene = new THREE.Scene();
+				scene.background = new THREE.Color( 0x01040E);
+
+				renderer = new THREE.WebGLRenderer( { antialias: true } );
+				renderer = new THREE.WebGLRenderer();
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				document.body.appendChild( renderer.domElement );
+				renderer.setSize( window.innerWidth, window.innerHeight );
+				
+				//ORBIT
+				controls = new THREE.OrbitControls( camera, renderer.domElement );
+
+				//LUZ
+				var ambientLight = new THREE.AmbientLight( 0x606060 );
+				scene.add( ambientLight );
+
+				//CAMARA
+				camera.position.x = 10;
+        		camera.position.z = 10;
+				camera.position.y = 10;
+
+				var carro_material = new THREE.MeshStandardMaterial( { color: 0x192774} );
+				var poste_material = new THREE.MeshStandardMaterial( { color: 0x1E1E1E} );
+				var piso_material = new THREE.MeshPhongMaterial( { color: 0x88898C } );
+				var piso2_material = new THREE.MeshPhongMaterial( { color: 0x5F5F5F } );
+				var id_material = new THREE.MeshStandardMaterial( { color: 0xFF0000 } );
+
+				var pared_material = new THREE.MeshPhongMaterial( {color: 0x1E1E1E} );
+				var pared2_material = new THREE.MeshPhongMaterial( {color: 0x302416} );
+				var pared3_material = new THREE.MeshPhongMaterial( {color: 0x150700} );
+
+				var per_material = new THREE.MeshToonMaterial( {color: 0x190030} );
+				var eli_material = new THREE.MeshStandardMaterial( { color: 0xECEDFF } );
+
+
+				//LUZ SPOTLIGHT
+				var spotLight = createSpotlight( 0xFFFBB0 );
+				spotLight.position.set( 0, 10, 0 );
+
+				scene.add(spotLight);
+
+				//GEOMETRIA LUZ
+				var sphere = new THREE.SphereBufferGeometry( 0.25, 16, 8 );
+				var moon = new THREE.SphereBufferGeometry( 2.5, 16, 8 );
+				var cube = new THREE.BoxGeometry( 1.5, 1.5, 1.5 );
+				var cube2 = new THREE.BoxGeometry( 0.5, 0.5, 0.5 );
+
+				//GEOMETRIAS
+				var geoFloor = new THREE.BoxGeometry( 20, .1, 50 );
+				var geoFloor2 = new THREE.BoxGeometry( 5, .25, 50 );
+				var cargeometry = new THREE.BoxGeometry( 3.5, 2, 7 );
+				var geoedificio = new THREE.BoxGeometry( 8, 10, 12 );
+				var geoedificio2 = new THREE.BoxGeometry( 8, 15, 15 );
+				var geoedificio3 = new THREE.BoxGeometry( 8, 12, 8 );
+				var geoedificio4 = new THREE.BoxGeometry( 8, 20, 13.5 );
+				var cilgeometry = new THREE.CylinderGeometry( .1, .1, 5, 32 );
+				var idgeometry = new THREE.CylinderGeometry( .25, .25, 1, 32 );
+				var pergeometry = new THREE.CylinderGeometry( .3, .3, 2, 32 );
+				var eli_geometry = new THREE.BoxGeometry( 3.5, 3, 6);
+
+				//OBJETOS
+				var id = new THREE.Mesh( idgeometry, id_material);
+				var per = new THREE.Mesh( pergeometry, per_material);
+				var floor = new THREE.Mesh( geoFloor, piso2_material );
+				var floor2 = new THREE.Mesh( geoFloor2, piso_material );
+				var floor3 = new THREE.Mesh( geoFloor2, piso_material );
+				var edificio = new THREE.Mesh( geoedificio, pared_material );
+				var edificio2 = new THREE.Mesh( geoedificio, pared2_material );
+				var edificio3= new THREE.Mesh( geoedificio2, pared2_material );
+				var edificio4= new THREE.Mesh( geoedificio2, pared_material );
+				var edificio5= new THREE.Mesh( geoedificio3, pared3_material );
+				var edificio6= new THREE.Mesh( geoedificio3, pared3_material );
+				var edificio7= new THREE.Mesh( geoedificio4, pared_material );
+				var edificio8= new THREE.Mesh( geoedificio4, pared2_material );
+				var car = new THREE.Mesh( cargeometry, carro_material );
+				var eli = new THREE.Mesh( eli_geometry, eli_material );
+
+				//POSICIONES
+				id.position.x = 5.5; id.position.y = .75; id.position.z = -14;
+
+				per.position.y = 1;
+
+				floor.position.z = -19;
+				
+				floor2.position.y = .1; floor2.position.z = -19; floor2.position.x = 7.5;
+
+				floor3.position.y = .1; floor3.position.z = -19; floor3.position.x = -7.5;
+
+				edificio.position.x = 14; edificio.position.y = 5; edificio.position.z = -22.5;
+
+				edificio2.position.x = -14; edificio2.position.y = 5; edificio2.position.z = -15.5;
+
+				edificio3.position.x = -14; edificio3.position.y = 7.5; edificio3.position.z = -1.5;
+
+				edificio4.position.x = 14; edificio4.position.y = 7.5; edificio4.position.z = -36.5;
+
+				edificio5.position.x = -14; edificio5.position.y = 6; edificio5.position.z = -26;
+
+				edificio6.position.x = 14; edificio6.position.y = 6; edificio6.position.z = -12;
+
+				edificio7.position.x = -14; edificio7.position.y = 10; edificio7.position.z = -37.25;
+
+				edificio8.position.x = 14; edificio8.position.y = 10; edificio8.position.z = -0.75;
+
+				car.position.y = 1; car.position.z = -25;
+
+				eli.position.y = 12;
+				//ILUMINACION
+
+				for(var j = 5.5; j >= -5.5; j -= 11){
+					for (var i = 5; i >= -45; i -= 8){
+					var poste = new THREE.Mesh( cilgeometry, poste_material );
+					var poste2 = new THREE.Mesh( cilgeometry, poste_material );
+
+					poste.position.x = 5.5; poste.position.y = 2.5; poste.position.z = (i);
+					poste2.position.x = -5.5; poste2.position.y = 2.5; poste2.position.z = (i);
+
+					scene.add(poste, poste2);
+
+					light1 = new THREE.PointLight( 0xDFA809, 5, 7.5 );
+					light1.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xFFBD00 } ) ) );
+
+					light1.position.x = (j); light1.position.y = 5; light1.position.z = (i);
+					scene.add( light1 );
+					}
+				}
+				
+				light3 = new THREE.PointLight( 0xFF0000, 2.5, 40 );
+				light3.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0xFF0000 } ) ) );
+
+				light4 = new THREE.PointLight( 0x000FFF, 2.5, 40 );
+				light4.add( new THREE.Mesh( sphere, new THREE.MeshBasicMaterial( { color: 0x000FFF } ) ) );
+				
+				light5 = new THREE.PointLight( 0xFFFFFF, 0.1, 50 );
+				light5.add( new THREE.Mesh( cube, new THREE.MeshBasicMaterial( { color: 0xFFFFFF } ) ) );
+
+				for(var i = 1.25; i >= -1.25;i-= 2.5){
+				light6 = new THREE.PointLight( 0xFFFFFF, 3, 5 );
+				light6.add( new THREE.Mesh( cube2, new THREE.MeshBasicMaterial( { color: 0xFFFFFF } ) ) );
+				light6.position.x = (i); light6.position.y = .5; light6.position.z = -21.5;
+				scene.add( light6 );
+				}
+
+				light3.position.x = .3; light3.position.y = 2.2; light3.position.z = -25;
+
+				light4.position.x = -.3; light4.position.y = 2.2; light4.position.z = -25;
+
+				light5.position.z = 2.5; light5.position.y = 12;
+
+				var pointLight = new THREE.PointLight( 0xffffff, .5, 100 );
+				pointLight.add( new THREE.Mesh( moon, new THREE.MeshBasicMaterial( { color: 0xffffff } ) ) );
+				pointLight.position.set( 0, 12, -50 );
+				
+				scene.add( pointLight, light3, light4, light5 );
+
+				scene.add(floor, floor2, floor3);
+				scene.add(car, edificio, edificio2, edificio3, edificio4, id, per, eli);
+				scene.add(edificio5, edificio6, edificio7, edificio8);
+			}
+
+
+			function createSpotlight( color ) {
+
+			var newObj = new THREE.SpotLight( color, 2 );
+
+			newObj.castShadow = true;
+			newObj.angle = 0.25;
+			newObj.penumbra = 0.2;
+			newObj.decay = 2;
+			newObj.distance = 50;
+
+			return newObj;
+			}
+
+			function animate() {
+        	render();
+			controls.update();
+        	requestAnimationFrame( animate );
+    		}
+    
+    		function render(){
+
+    		/*var dtime = Date.now()-startTime;
+    		camera.position.x = 11*Math.cos(dtime/10000);
+        	camera.position.z = 12*Math.sin(dtime/10000);
+			camera.position.y = 5;
+			camera.lookAt( 0, 0, 0 );*/
+       		renderer.render( scene, camera );
+
+	    	}
+
+		</script>
+	</body>
+</html>
