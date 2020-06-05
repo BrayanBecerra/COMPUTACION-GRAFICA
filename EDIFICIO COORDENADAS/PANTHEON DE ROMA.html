@@ -1,0 +1,152 @@
+﻿<html>
+	<head>
+		<title>My first three.js app</title>
+		<style>
+			body { margin: 0; }
+			canvas { display: block; }
+		</style>
+	</head>
+	<body>
+		<script src="js/three.js"></script>
+		<script>
+
+
+			
+			inicio();
+
+			function inicio(){
+
+			var render = new THREE.WebGLRenderer();
+			render.setSize(window.innerWidth, window.innerHeight);
+			document.body.appendChild( render.domElement );
+
+			escenario = new THREE.Scene();
+			camera = new THREE.PerspectiveCamera( 75, window.innerWidth/window.innerHeight, 0.1, 1000 );
+			
+			camera.position.x = 0;
+			camera.position.y = 100;
+			camera.position.z = 350;
+
+			geometria=new THREE.Geometry();
+			
+			edificio();
+
+			render.render(escenario,camera);
+			}
+
+			function cubo(posx, posy, posz, altura, tam){ 
+
+			var material = new THREE.LineBasicMaterial( { color:0xFFFFFF  } );
+			
+				for(posy=posy;posy<altura;posy++){
+					var puntos = [];
+					puntos.push( new THREE.Vector3( -140-tam/250, posy,-40-tam/250) );
+					puntos.push( new THREE.Vector3( -140-tam/250, posy,40+tam ) );
+					puntos.push( new THREE.Vector3( 140+tam/250, posy,40+tam ) );
+					puntos.push( new THREE.Vector3( 140+tam/250, posy,-40-tam/250) );
+					puntos.push( new THREE.Vector3( -140-tam/250, posy,-40-tam/250) );
+
+					var geometria = new THREE.BufferGeometry().setFromPoints( puntos );
+					var linea = new THREE.Line( geometria, material );
+
+					escenario.add( linea );
+				}
+			}
+
+			function cilindro(radio, posx, posy,altura){
+
+			var max = Math.PI*2;
+			var aum = Math.PI*1/200;
+				
+			for(z=0;z<altura;z++){
+				for(theta=0;theta<max;theta+=aum){
+					x = radio * Math.cos(theta);
+					y = radio * Math.sin(theta);
+					vector=new THREE.Vector3(x + posx,z - 60, y + posy);
+					geometria.vertices.push(vector);
+					}
+				}
+			materialparticula=new THREE.ParticleBasicMaterial({ color:0x0000ff});
+			pixel=new THREE.ParticleSystem(geometria,materialparticula);
+			escenario.add(pixel);
+			}			
+
+			function Semiesfera(){ 
+
+			var circuloGeometria = new THREE.Geometry();
+			var mit = 180;
+			var comp = 360;
+
+			for(var j=-180; j<mit; j++){
+  		    		for(var i=-360; i<comp; i++){
+
+					x = 180 * Math.cos(Math.PI*j/mit);	
+					z = 180 * Math.cos(Math.PI*i/comp)*Math.sin(Math.PI*j/mit); 					
+		       			y = 180 * Math.sin(Math.PI*i/comp)*Math.sin(Math.PI*j/mit);
+				
+					var vector = new THREE.Vector3(x,y + 160,z-140);
+
+					if( vector.y < 160 ){
+					break;
+					}
+         		circuloGeometria.vertices.push(vector); 				
+  		   		}
+ 			}
+         
+			var material = new THREE.MeshBasicMaterial({color:0xFFFFFF, size: 0.1}); 
+			var circulo = new THREE.Line(circuloGeometria, material);
+			escenario.add(circulo);
+			}
+
+			function edificio(){
+			
+			tam=0;
+			radio=0; 
+			posx=0;
+			posy=0;
+			posz=0;
+			altura=0;
+
+			//Principal
+			cubo(posx,posy-60,posz-60,altura+50,tam);
+
+			//Superior
+			cubo(posx,posy+60,posz+20,altura+90,tam+100);
+
+			//Superior peque�o
+			cubo(posx,posy+50,posz+20,altura+150,tam+20);
+
+			//Cilindro base
+			cilindro(radio+180,posx,posy-140,altura+220);
+
+			//Cilindros Delanteros
+			posx=-133;
+			for(i=0;i<8;i++){
+
+			cilindro(radio+6,posx,posy+130,altura+125);
+			posx+=38;
+
+			//Cilindros Mitad
+			}
+			posx=-133;
+			for(i=0;i<8;i++){
+
+			cilindro(radio+6,posx,posy+90,altura+125);
+			posx+=38;
+			}
+
+			//Cilindros Atras
+			posx=-133;
+			for(i=0;i<8;i++){
+
+			cilindro(radio+6,posx,posy+50,altura+125);
+			posx+=38;
+			}
+
+			//Cupula
+			Semiesfera();
+
+		}
+		</script>
+	</body>
+</html>
