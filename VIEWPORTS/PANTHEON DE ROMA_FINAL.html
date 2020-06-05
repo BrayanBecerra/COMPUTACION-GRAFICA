@@ -1,0 +1,257 @@
+﻿<html>
+	<head>
+		<title>CAMARAS</title>
+		<style>
+			body { margin: 0; }
+			canvas { display: block; }
+		</style>
+	</head>
+	<body>
+		<script src="js/three.js"></script>
+		<script src="js/controls/OrbitControls.js"></script>
+		<script src='js/libs/dat.gui.min.js'></script>
+		<script>
+
+		var scene, aspect, camera, camera2, renderer, controls;
+        var w = window.innerWidth, h = window.innerHeight;
+		var mapWidth = w/3, mapHeight = h/2;
+		var startTime = Date.now();
+			
+			inicio();
+			animate();
+
+			function inicio(){
+			
+			aspect = (window.innerWidth) / (window.innerHeight);
+			geometria=new THREE.Geometry();
+			scene = new THREE.Scene();
+			renderer = new THREE.WebGLRenderer();
+			renderer.setSize(window.innerWidth, window.innerHeight);
+			document.body.appendChild( renderer.domElement );
+
+			camera = new THREE.PerspectiveCamera( 100, aspect, 0.1, 1000 );
+			controls = new THREE.OrbitControls( camera, renderer.domElement );
+
+			//CREAR CAMARAS
+
+			var width = 16.0;
+			var height = 9.0;
+			var FOV = 45.0;			//Ángulo de apertura
+			var aR = width/height;	//AspectRatio
+			var nearZ = 1;
+			var farZ = 500;
+            var dis = 400;
+			var mov = 100;
+			var frustumSize = 600;
+
+            // CAMARAS ORTOGONALES
+
+			camera2 = new THREE.OrthographicCamera( 0.5 * frustumSize * aspect / - 2, 0.5 * frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, nearZ, farZ );
+            camera3 = new THREE.OrthographicCamera( 0.5 * frustumSize * aspect / - 2, 0.5 * frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, nearZ, farZ );
+            camera4 = new THREE.OrthographicCamera( 0.5 * frustumSize * aspect / - 2, 0.5 * frustumSize * aspect / 2, frustumSize / 2, frustumSize / - 2, nearZ, farZ );
+
+            //CAMARAS PERSPECTIVA
+
+            /*camera2 = new THREE.PerspectiveCamera( FOV, aR, nearZ, farZ );
+            camera3 = new THREE.PerspectiveCamera( FOV, aR, nearZ, farZ );
+			camera4 = new THREE.PerspectiveCamera( FOV, aR, nearZ, farZ );*/
+
+			//UBICACION DE LAS CAMARAS PARA QUE SEA VEA TODO EL EDIFICIO
+
+			camera2.position.z = dis; //FRONTAL 
+			camera2.position.y = mov;
+			
+			camera3.position.y = dis + 120; //SUPERIOR
+			camera3.position.z = -mov; 
+
+			camera4.position.x = dis; //LATERAL
+			camera4.position.y = mov + 10;
+			camera4.position.z = -mov;
+
+			camera2.lookAt( 0, mov, 0);
+			camera3.lookAt( 0, 0, -mov );
+			camera4.lookAt( 0, mov + 10, -mov );
+
+			//HELPERS CAMARA
+
+			var cam2 = new THREE.CameraHelper( camera2 );
+			var cam3 = new THREE.CameraHelper( camera3 );
+			var cam4 = new THREE.CameraHelper( camera4 );
+
+			scene.add( cam2);
+			scene.add( cam3);
+			scene.add( cam4);
+
+			//POSICION CAMARA
+			camera.position.x = 500;
+			camera.position.y = 500;
+			camera.position.z = 500;
+			camera.lookAt( 0,0,0 );
+
+			//CREAR OBJETO
+			edificio();
+
+			//CUBO PRUEBA ORBIT
+
+			/*var geometry = new THREE.BoxGeometry( 200, 200, 200 );
+			var material = new THREE.MeshBasicMaterial( {color: 0x00ff00} );
+			var cube = new THREE.Mesh( geometry, material );
+			scene.add( cube );*/
+
+			}
+
+			function cubo(posx, posy,posz,tx,ty,tz){ 
+            var geoCubo = new THREE.Geometry();
+
+            var coor=5;
+
+            for(var i=0; i<tx; i+=coor){
+                for(var j=0; j<ty; j+=coor){
+                    for( var t=0; t<tz; t+=coor){	
+
+                    var line = new THREE.Vector3();
+                    line.x = i + posx;
+                    line.y = j + posy;
+                    line.z = t + posz;
+                    geoCubo.vertices.push( line );
+
+                     }
+                }
+            }
+
+            var matLinea = new THREE.LineBasicMaterial( { color: 0xFFFFFF } );
+            var cubo = new THREE.Line( geoCubo, matLinea );
+            scene.add( cubo );
+			}
+
+			function cilindro(radio, posx, posy, altura, den){
+
+			var max = Math.PI*2;
+			var aum = Math.PI*1/den; //DENSIDAD DE PUNTOS
+				
+			for(z=0;z<altura;z++){
+				for(theta=0;theta<max;theta+=aum){
+					x = radio * Math.cos(theta);
+					y = radio * Math.sin(theta);
+					vector=new THREE.Vector3(x + posx,z - 60, y + posy);
+					geometria.vertices.push(vector);
+					}
+				}
+			materialparticula=new THREE.ParticleBasicMaterial({ color:0x0000ff});
+			pixel=new THREE.ParticleSystem(geometria,materialparticula);
+			scene.add(pixel);
+			}			
+
+			function Semiesfera(){ 
+
+			var circuloGeometria = new THREE.Geometry();
+			var mit = 180;
+			var comp = 360;
+
+			for(var j=-180; j<mit; j++){
+  		    		for(var i=-360; i<comp; i++){
+
+					x = 180 * Math.cos(Math.PI*j/mit);	
+					z = 180 * Math.cos(Math.PI*i/comp)*Math.sin(Math.PI*j/mit); 					
+		       		y = 180 * Math.sin(Math.PI*i/comp)*Math.sin(Math.PI*j/mit);
+				
+					var vector = new THREE.Vector3(x,y + 160,z-140);
+
+					if( vector.y < 160 ){
+					break;
+					}
+         		circuloGeometria.vertices.push(vector); 				
+  		   		}
+ 			}
+         
+			var material = new THREE.MeshBasicMaterial({color:0xFFFFFF, size: 0.1}); 
+			var circulo = new THREE.Line(circuloGeometria, material);
+			scene.add(circulo);
+			}
+
+			function edificio(){
+
+            var tx, ty, tz;
+            tx = ty = tz = 0;
+            den=0;
+			radio=0; 
+			posx=0;
+			posy=0;
+			posz=0;
+			altura=0;
+
+			//Principal
+			cubo(posx-135, posy-60, posz-50, tx+280, ty+175 ,tz+90);
+
+            //arriba
+			cubo(posx-135, posy+70, posz-50, tx+280, ty+100 ,tz+150);
+
+             //arriba2
+			cubo(posx-135, posy+65, posz-50, tx+280, ty+50 ,tz+200);
+
+			//Cilindro base
+			cilindro(radio+180,posx,posy-140,altura+220, den+100);
+
+			//Cilindros Delanteros
+			posx=-133;
+			for(i=0;i<8;i++){
+
+			cilindro(radio+6,posx,posy+130,altura+125, den +7);
+			posx+=38;
+
+			}
+
+            //Cilindros Mitad
+			posx=-133;
+			for(i=0;i<8;i++){
+
+			cilindro(radio+6,posx,posy+90,altura+125, den+7);
+			posx+=38;
+			}
+
+			//Cilindros Atras
+			posx=-133;
+			for(i=0;i<8;i++){
+
+			cilindro(radio+6,posx,posy+50,altura+125, den+7);
+			posx+=38;
+			}
+
+			//Cupula
+			Semiesfera();
+
+		}
+
+		//ANIMACION ORBIT / CAMARA SUPERIOR
+
+		function animate() {
+			requestAnimationFrame( animate );
+			controls.update();
+			render();
+		}
+
+		//RENDER CAMARAS
+
+        function render() {
+            renderer.setViewport( 0, -h/4, w, h );
+            renderer.setScissor( 0, -h/4, w, h );
+            renderer.render( scene, camera );
+		
+            renderer.setViewport( 0, h - mapHeight , mapWidth, mapHeight ); 
+            renderer.setScissor( 0, h - mapHeight , mapWidth, mapHeight );
+            renderer.setScissorTest( true );
+            renderer.render( scene, camera2 );
+
+			renderer.setViewport( mapWidth, h - mapHeight, mapWidth, mapHeight );
+            renderer.setScissor( mapWidth, h - mapHeight, mapWidth, mapHeight );
+            renderer.setScissorTest( true );
+            renderer.render( scene, camera3 );
+
+			renderer.setViewport( mapWidth*2, h - mapHeight, mapWidth, mapHeight );
+            renderer.setScissor( mapWidth*2, h - mapHeight, mapWidth, mapHeight );
+            renderer.setScissorTest( true );
+            renderer.render( scene, camera4);
+		}
+		</script>
+	</body>
+</html>
